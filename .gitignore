@@ -2,5 +2,6 @@
 *.env
 !.env.example
 data/
-onedrive/
+onedrive/conf/*
+!onedrive/conf/sync_list
 *.log
