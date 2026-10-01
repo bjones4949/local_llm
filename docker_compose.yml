@@ -68,19 +68,19 @@ services:
       - anythingllm-storage:/app/server/storage
       - ${ONEDRIVE_DATA_DIR}:/app/onedrive:ro   # synced docs, read-only
 
-  # ---------------------------------------------------------------
-  # OneDrive sync (abraunegg/onedrive)
-  # ---------------------------------------------------------------
-  onedrive:
-    image: driveone/onedrive:${ONEDRIVE_TAG:-edge}
-    restart: unless-stopped
-    environment:
-      ONEDRIVE_UID: ${PUID:-1000}
-      ONEDRIVE_GID: ${PGID:-1000}
-      ONEDRIVE_DOWNLOADONLY: ${ONEDRIVE_DOWNLOADONLY:-1}
-    volumes:
-      - onedrive-conf:/onedrive/conf          # auth token + config (never in git)
-      - ${ONEDRIVE_DATA_DIR}:/onedrive/data
+  # # ---------------------------------------------------------------
+  # # OneDrive sync (abraunegg/onedrive)
+  # # ---------------------------------------------------------------
+  # onedrive:
+  #   image: driveone/onedrive:${ONEDRIVE_TAG:-edge}
+  #   restart: unless-stopped
+  #   environment:
+  #     ONEDRIVE_UID: ${PUID:-1000}
+  #     ONEDRIVE_GID: ${PGID:-1000}
+  #     ONEDRIVE_DOWNLOADONLY: ${ONEDRIVE_DOWNLOADONLY:-1}
+  #   volumes:
+  #     - onedrive-conf:/onedrive/conf          # auth token + config (never in git)
+  #     - ${ONEDRIVE_DATA_DIR}:/onedrive/data
 
 volumes:
   hf-cache:
