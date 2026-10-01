@@ -25,8 +25,29 @@ services:
       ONEDRIVE_GID: ${PGID:-1000}
       ONEDRIVE_DOWNLOADONLY: ${ONEDRIVE_DOWNLOADONLY:-1}
     volumes:
+      # configuration and data directories
       - ./onedrive/conf:/onedrive/conf
       - ${ONEDRIVE_DATA_DIR:-/srv/onedrive}:/onedrive/data
+
+  vllm:
+    build: ./vllm-cpu
+    image: local/vllm-cpu:0.30.0
+    restart: unless-stopped
+    shm_size: 4g
+    environment:
+      VLLM_CPU_KVCACHE_SPACE: "2"
+    volumes:
+      - hf-cache:/root/.cache/huggingface
+    command:
+      - Qwen/Qwen2.5-0.5B-Instruct
+      - --served-model-name
+      - local-model
+      - --max-model-len
+      - "2048"
+      - --api-key
+      - ${VLLM_API_KEY}
+    ports:
+      - "127.0.0.1:8000:8000"
 
 volumes:
   anythingllm-storage:
