@@ -1,1 +1,5 @@
 start everything: docker compose up -d
+
+Getting your OneDrive files into AnythingLLM. Right now the files are visible to the container at /app/onedrive, but AnythingLLM doesn't pick them up on its own. For now, upload documents into a workspace through the UI. When you want it automatic, the next step would be a small script that watches /srv/onedrive and pushes new or changed files through AnythingLLM's API, which could run as another service in this same compose file.
+
+When the GPU arrives, the only service that changes is vllm. You swap build: ./vllm-cpu for the official vllm/vllm-openai image, add the GPU deploy: block, pick a bigger model, and raise the token limits in both services. Everything else stays as it is.
