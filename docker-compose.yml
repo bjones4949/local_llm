@@ -1,88 +1,20 @@
 name: local-llm
 
 services:
-  # # ---------------------------------------------------------------
-  # # vLLM - OpenAI-compatible inference server (GPU)
-  # # ---------------------------------------------------------------
-  # vllm:
-  #   image: vllm/vllm-openai:${VLLM_TAG:-latest}
-  #   restart: unless-stopped
-  #   ipc: host                      # vLLM needs large shared memory
-  #   environment:
-  #     HUGGING_FACE_HUB_TOKEN: ${HF_TOKEN:-}
-  #   volumes:
-  #     - hf-cache:/root/.cache/huggingface   # model weights survive rebuilds
-  #   command:
-  #     - --model
-  #     - ${VLLM_MODEL}
-  #     - --served-model-name
-  #     - ${VLLM_SERVED_NAME}
-  #     - --max-model-len
-  #     - "${VLLM_MAX_MODEL_LEN}"
-  #     - --gpu-memory-utilization
-  #     - "${VLLM_GPU_MEM_UTIL}"
-  #     - --api-key
-  #     - ${VLLM_API_KEY}
-  #   ports:
-  #     - "127.0.0.1:8000:8000"      # localhost only; AnythingLLM uses the internal network
-  #   deploy:
-  #     resources:
-  #       reservations:
-  #         devices:
-  #           - driver: nvidia
-  #             count: all
-  #             capabilities: [gpu]
-  #   healthcheck:
-  #     test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 5
-  #     start_period: 600s           # first run downloads the model
-
-  # ---------------------------------------------------------------
-  # AnythingLLM - UI / RAG front end
-  # ---------------------------------------------------------------
   anythingllm:
     image: mintplexlabs/anythingllm:${ANYTHINGLLM_TAG:-latest}
     restart: unless-stopped
     cap_add:
       - SYS_ADMIN
-    depends_on:
-      vllm:
-        condition: service_healthy
     ports:
       - "${ANYTHINGLLM_PORT:-3001}:3001"
     environment:
       STORAGE_DIR: /app/server/storage
       JWT_SECRET: ${ANYTHINGLLM_JWT_SECRET}
-      # LLM -> vLLM via OpenAI-compatible API
-      LLM_PROVIDER: generic-openai
-      GENERIC_OPEN_AI_BASE_PATH: http://vllm:8000/v1
-      GENERIC_OPEN_AI_MODEL_PREF: ${VLLM_SERVED_NAME}
-      GENERIC_OPEN_AI_MODEL_TOKEN_LIMIT: ${VLLM_MAX_MODEL_LEN}
-      GENERIC_OPEN_AI_API_KEY: ${VLLM_API_KEY}
-      # Embeddings + vector DB (built-in, no extra containers)
       EMBEDDING_ENGINE: native
       VECTOR_DB: lancedb
     volumes:
       - anythingllm-storage:/app/server/storage
-      - ${ONEDRIVE_DATA_DIR}:/app/onedrive:ro   # synced docs, read-only
-
-  # # ---------------------------------------------------------------
-  # # OneDrive sync (abraunegg/onedrive)
-  # # ---------------------------------------------------------------
-  # onedrive:
-  #   image: driveone/onedrive:${ONEDRIVE_TAG:-edge}
-  #   restart: unless-stopped
-  #   environment:
-  #     ONEDRIVE_UID: ${PUID:-1000}
-  #     ONEDRIVE_GID: ${PGID:-1000}
-  #     ONEDRIVE_DOWNLOADONLY: ${ONEDRIVE_DOWNLOADONLY:-1}
-  #   volumes:
-  #     - onedrive-conf:/onedrive/conf          # auth token + config (never in git)
-  #     - ${ONEDRIVE_DATA_DIR}:/onedrive/data
 
 volumes:
-  hf-cache:
   anythingllm-storage:
-  onedrive-conf:
