@@ -1,7 +1,7 @@
 FROM python:3.12-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      libtcmalloc-minimal4 libnuma1 \
+      libtcmalloc-minimal4 libnuma1 g++ \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip install --no-cache-dir vllm-cpu==0.30.0 \
