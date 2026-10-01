@@ -13,10 +13,19 @@ services:
       JWT_SECRET: ${ANYTHINGLLM_JWT_SECRET}
       EMBEDDING_ENGINE: native
       VECTOR_DB: lancedb
+      LLM_PROVIDER: generic-openai
+      GENERIC_OPEN_AI_BASE_PATH: http://vllm:8000/v1
+      GENERIC_OPEN_AI_MODEL_PREF: local-model
+      GENERIC_OPEN_AI_MODEL_TOKEN_LIMIT: "2048"
+      GENERIC_OPEN_AI_MAX_TOKENS: "1024"
+      GENERIC_OPEN_AI_API_KEY: ${VLLM_API_KEY}
     volumes:
       - anythingllm-storage:/app/server/storage
       - ${ONEDRIVE_DATA_DIR:-/srv/onedrive}:/app/onedrive:ro
-
+    depends_on:
+      vllm:
+        condition: service_healthy
+        
   onedrive:
     image: driveone/onedrive:${ONEDRIVE_TAG:-edge}
     restart: unless-stopped
@@ -48,6 +57,13 @@ services:
       - ${VLLM_API_KEY}
     ports:
       - "127.0.0.1:8000:8000"
+
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 300s
 
 volumes:
   anythingllm-storage:
