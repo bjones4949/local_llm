@@ -15,6 +15,18 @@ services:
       VECTOR_DB: lancedb
     volumes:
       - anythingllm-storage:/app/server/storage
+      - ${ONEDRIVE_DATA_DIR:-/srv/onedrive}:/app/onedrive:ro
+
+  onedrive:
+    image: driveone/onedrive:${ONEDRIVE_TAG:-edge}
+    restart: unless-stopped
+    environment:
+      ONEDRIVE_UID: ${PUID:-1000}
+      ONEDRIVE_GID: ${PGID:-1000}
+      ONEDRIVE_DOWNLOADONLY: ${ONEDRIVE_DOWNLOADONLY:-1}
+    volumes:
+      - ./onedrive/conf:/onedrive/conf
+      - ${ONEDRIVE_DATA_DIR:-/srv/onedrive}:/onedrive/data
 
 volumes:
   anythingllm-storage:
