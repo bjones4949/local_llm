@@ -21,7 +21,7 @@ services:
       GENERIC_OPEN_AI_API_KEY: ${VLLM_API_KEY}
     volumes:
       - anythingllm-storage:/app/server/storage
-      - ${ONEDRIVE_DATA_DIR:-/srv/onedrive}:/app/onedrive:ro
+      - ${ONEDRIVE_DATA_DIR:-/srv/onedrive}:/app/server/storage/anythingllm-fs/onedrive:ro
     depends_on:
       vllm:
         condition: service_healthy
