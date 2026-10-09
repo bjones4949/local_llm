@@ -13,9 +13,16 @@ services:
     environment:
       STORAGE_DIR: /app/server/storage
       JWT_SECRET: ${ANYTHINGLLM_JWT_SECRET}
-      EMBEDDING_ENGINE: native
       VECTOR_DB: lancedb
+      # Chat model (llm service)
       LLM_PROVIDER: generic-openai
+      GENERIC_OPEN_AI_BASE_PATH: http://llm:8000/v1
+      GENERIC_OPEN_AI_MODEL_PREF: local-model
+      GENERIC_OPEN_AI_MODEL_TOKEN_LIMIT: "8192"
+      GENERIC_OPEN_AI_MAX_TOKENS: "1024"
+      GENERIC_OPEN_AI_API_KEY: ${VLLM_API_KEY}
+      # Embedding model (embed service)
+      EMBEDDING_ENGINE: generic-openai
       EMBEDDING_BASE_PATH: http://embed:8000/v1
       EMBEDDING_MODEL_PREF: embed-model
       EMBEDDING_MODEL_MAX_CHUNK_LENGTH: "1000"
@@ -25,6 +32,8 @@ services:
       - ${ONEDRIVE_DATA_DIR:-/srv/onedrive}:/app/server/storage/anythingllm-fs
     depends_on:
       llm:
+        condition: service_healthy
+      embed:
         condition: service_healthy
 
   onedrive:
