@@ -16,11 +16,10 @@ services:
       EMBEDDING_ENGINE: native
       VECTOR_DB: lancedb
       LLM_PROVIDER: generic-openai
-      GENERIC_OPEN_AI_BASE_PATH: http://llm:8000/v1
-      GENERIC_OPEN_AI_MODEL_PREF: local-model
-      GENERIC_OPEN_AI_MODEL_TOKEN_LIMIT: "8192"
-      GENERIC_OPEN_AI_MAX_TOKENS: "1024"
-      GENERIC_OPEN_AI_API_KEY: ${VLLM_API_KEY}
+      EMBEDDING_BASE_PATH: http://embed:8000/v1
+      EMBEDDING_MODEL_PREF: embed-model
+      EMBEDDING_MODEL_MAX_CHUNK_LENGTH: "1000"
+      GENERIC_OPEN_AI_EMBEDDING_API_KEY: ${VLLM_API_KEY}
     volumes:
       - anythingllm-storage:/app/server/storage
       - ${ONEDRIVE_DATA_DIR:-/srv/onedrive}:/app/server/storage/anythingllm-fs
@@ -39,6 +38,49 @@ services:
       # configuration and data directories
       - ./onedrive/conf:/onedrive/conf
       - ${ONEDRIVE_DATA_DIR:-/srv/onedrive}:/onedrive/data
+
+  embed:
+    image: ghcr.io/ggml-org/llama.cpp:${LLAMACPP_TAG:-server-cuda}
+    restart: unless-stopped
+    environment:
+      LLAMA_CACHE: /models
+    volumes:
+      - llm-models:/models
+    command:
+      - -hf
+      - ${EMBED_GGUF:-Qwen/Qwen3-Embedding-0.6B-GGUF:Q8_0}
+      - --alias
+      - embed-model
+      - --embedding
+      - --pooling
+      - last
+      - -c
+      - "8192"
+      - -b
+      - "2048"
+      - -ub
+      - "2048"
+      - -ngl
+      - "99"
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+      - --api-key
+      - ${VLLM_API_KEY}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 300s
 
   llm:
     image: ghcr.io/ggml-org/llama.cpp:${LLAMACPP_TAG:-server-cuda}
