@@ -1,4 +1,14 @@
-start everything: docker compose up -d
+## Installation
+1. https://docs.docker.com/engine/install/ubuntu/
+2. add $user to docker group
+sudo usermod -aG docker $USER
+newgrp docker
+3. clone repo using: git clone https://github.com/bjones4949/local_llm.git
+
+## Start command 
+docker compose up -d
+
+
 
 Getting your OneDrive files into AnythingLLM. Right now the files are visible to the container at /app/onedrive, but AnythingLLM doesn't pick them up on its own. For now, upload documents into a workspace through the UI. When you want it automatic, the next step would be a small script that watches /srv/onedrive and pushes new or changed files through AnythingLLM's API, which could run as another service in this same compose file.
 
