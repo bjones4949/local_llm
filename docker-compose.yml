@@ -34,7 +34,7 @@ services:
     environment:
       ONEDRIVE_UID: ${PUID:-1000}
       ONEDRIVE_GID: ${PGID:-1000}
-      ONEDRIVE_DOWNLOADONLY: ${ONEDRIVE_DOWNLOADONLY:0}
+      ONEDRIVE_DOWNLOADONLY: ${ONEDRIVE_DOWNLOADONLY:-1}
     volumes:
       # configuration and data directories
       - ./onedrive/conf:/onedrive/conf
