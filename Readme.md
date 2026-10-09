@@ -3,7 +3,29 @@
 2. add $user to docker group
 sudo usermod -aG docker $USER
 newgrp docker
-3. clone repo using: git clone https://github.com/bjones4949/local_llm.git
+3. clone repo using: git clone https://github.com/bjones4949/local_llm.git\
+
+
+
+
+
+## Onedrive setup
+Then OneDrive sign-in and start-up:
+
+bash
+cd ~/local_llm
+docker compose down
+sudo mkdir -p /srv/onedrive && sudo chown $(id -u):$(id -g) /srv/onedrive
+docker compose run --rm -it onedrive
+
+Sign in, wait for “Sync with Microsoft OneDrive is complete”, press Ctrl+C, then:
+
+bash
+docker compose up -d
+docker compose logs -f llm
+
+
+
 
 ## Start command 
 docker compose up -d
